@@ -16,6 +16,10 @@ cd GeneralPhysicsMidtermExam
 pip install -r requirements.txt
 ```
 
+# Issues
+
+  Google Colab PiP無法安裝WxPython，需使用conda安裝或於本機環境模擬
+
 # Run
 
 ```bash
