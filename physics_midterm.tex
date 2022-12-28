@@ -1,0 +1,635 @@
+\documentclass[UTF8,a4paper,12pt]{article}
+\usepackage[fontset=none]{ctex}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage[marginpar=2cm]{geometry}
+\usepackage{wallpaper}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{xeCJK}
+
+\lstset{
+    frame=tb,
+    language=python,
+    basicstyle=\ttfamily,
+    numbers=none,
+    numberstyle=\tiny\color{blue},
+    keywordstyle=\color{red},
+    stringstyle=\color{green},
+    commentstyle=\color{pink},
+    aboveskip=5pt,
+    belowskip=5pt,
+    showstringspaces=false,
+    columns=flexible,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4
+}
+
+\setmainfont{Times New Roman}
+\xeCJKsetup{AutoFakeBold=true}
+\setCJKmainfont{標楷體}
+\setCJKmonofont{標楷體}
+
+\title{\fontsize{18pt}{\baselineskip} \textbf{普通物理期中}}
+\author{\fontsize{16pt}{\baselineskip}11127137 黃乙家}
+\date{}
+
+
+
+\begin{document}
+\maketitle
+
+\fontsize{12pt}{\baselineskip}
+
+所有模擬程式碼皆放在Github上，
+
+連結：\url{https://github.com/ja-errorpro/GeneralPhysicsMidtermExam}
+
+\section{低軌衛星題}
+
+低軌衛星是目前趨勢,包括著名的星鏈計畫,然而根據普通物理的角度來思
+考,低軌衛星的優缺點有哪些呢?這題將透過引導一系列的小題來思考低軌
+衛星的效能。(考量地球半徑為 $6400$ 公里,地表重力場 $9.8 N$,不考慮太陽影
+響,台灣處在緯度為 $ 23^\circ $ ,考量通訊利用光線傳輸且光速為 $ 3 \times 10^8 m/s $ , 不
+考慮相對論效應。)
+
+\subsection{一般通訊衛星都在赤道面上, 試論為何?是否可以沿著北緯 \texorpdfstring{$ 23^\circ $}{23} 的剖面做衛星?}
+
+要求衛星速度 = 地球自轉速度，在赤道面上可維持同步軌道。
+可在北緯 $ 23^\circ $ 的剖面做衛星，但需要克服更多阻力而不能維持同步，較耗成本，故不適用。
+
+\subsection{一般的通訊衛星是同步衛星, 請計算同步衛星距離地表多高?}
+
+$$ F = ma = m \frac{v^2}{r} = mr\omega^2 $$
+$$ F \propto m ,  F \propto r^{-2} \Rightarrow F \propto mr^{-2} $$
+$$ \Rightarrow F = \frac{Km}{r^2} = mr\omega^2 $$
+
+\newpage
+
+設 $r$ 為 $R + H$ (地球半徑+衛星高度)，所求為 $H$。
+$$ r^3 = (R+H)^3 = \frac{K}{\omega^2}  $$
+$$ R + H = \sqrt[3]{\frac{K}{\omega^2}} $$
+$$ H = \sqrt[3]{\frac{K}{\omega^2}} - R $$
+$ \because a = g $ while $H = 0$ ， $\therefore \frac{Km}{R^2} = mg \Rightarrow K = gR^2 $，$\omega = \frac{2\pi}{T}$
+$$ \Rightarrow H = \sqrt[3]{\frac{gR^2T^2}{4\pi^2}} - R $$
+代入 $R = 6.4e6 $ m, $T = 86400$ s, $g = 9.8$ N, $\pi = 3.14$
+$$ H \simeq 3.594e7\ m = 35940\ km$$
+
+程式碼(Python3)：
+
+\begin{lstlisting}
+    # 1_B.py
+    import math
+    R = 6.4e6
+    T = 86400
+    g = 9.8
+    pi = math.pi
+    H = (g*(R**2)*(T**2)/(4*(pi**2)))**(1/3) - R
+    print(H, "m, or ", H/1000, "km")
+\end{lstlisting}
+
+\subsection{低空衛星高度距離地表約為 \texorpdfstring{$500$}{500} 公里左右, 請計算繞地球一周多久?}
+
+克卜勒第三定律： $\frac{R^3}{T^2} = \mathbb{C} $
+$$ \Rightarrow \frac{ {(6.4e6 + 3.594e7)}^3 }{86400^2} = \frac{ {(6.4e6+5e5)}^3 }{T^2} $$
+$$ T = \sqrt{\frac{{(6.4e6+5e5)}^3}{{(6.4e6+3.594e7)}^3} \times 86400^2 } \simeq 5684.1\ s $$
+
+程式碼(Python3)：
+
+\begin{lstlisting}
+    # 1_C.py
+    import math
+    R = 6.4e6
+    T = 86400
+    g = 9.8
+    pi = math.pi
+    H_B = (g*(R**2)*(T**2)/(4*(pi**2)))**(1/3) - R
+    H_C = 5e5
+    T_C = math.sqrt(((R+H_C)**3)/((R+H_B)**3)*(T**2))
+    print(T_C, "s")
+\end{lstlisting}
+
+\subsection{根據 1.2、1.3 兩題的距離討論這兩種衛星大約可以觀測地球上的球面積為
+多少?}
+
+設 $R$ 為地球半徑，$h$ 為衛星距地表高度，$O$ 為地球中心點，$A$ 為衛星位置，$A$ 切地球於 $B$ 點，$\theta = \angle AOB $：
+所求為球冠面積，若球冠最大開口圓半徑為 $r$，則 $$R = r sin\ \theta$$
+
+積分表達面積
+$$ S = \int^{\theta}_\pi 2\pi r R d\theta $$
+$$ = \int^{\theta}_\pi 2\pi R^2 sin\ \theta d\theta $$
+$$ = 2\pi R^2 \int^\theta_\pi sin\ \theta d \theta $$
+$$ = 2\pi R^2 (1-cos\ \theta ) $$
+$$ = 2\pi R^2 (1 - \frac{R}{R+h}) $$
+兩衛星各數值代入，得：
+
+同步衛星：$ S = 2\pi \times 6400^2 (1 - \frac{6400}{6400+35940}) \simeq 2.1e8\ km^2 $
+
+低空衛星：$ S = 2\pi \times 6400^2 (1 - \frac{6400}{6400+500}) \simeq 1.86e7\ km^2 $
+
+程式碼(Python3)：
+
+\begin{lstlisting}
+    # 1_D.py
+    import math
+    R = 6400
+    pi = math.pi
+    H_B = 35940
+    H_C = 500
+    S_B = 2*pi*(R**2)*(1-R/(R+H_B))
+    S_C = 2*pi*(R**2)*(1-R/(R+H_C))
+    print("S_B: ", S_B, "km^2")
+    print("S_C: ", S_C, "km^2")
+\end{lstlisting}
+
+\subsection{根據 1.1、1.2、1.3 請設計針對台灣(北緯 \texorpdfstring{$ 23^\circ $}{23} )需要多少一般衛星或低空
+衛星才能使所有時間都有衛星訊號?(請考量地球自轉、衛星間轉換訊
+號與衛星傳遞到地面的時間)}
+
+地球表面積 $4 \pi R^2 \simeq 5.1e8\ km^2$
+
+預期(只考慮圓)：
+
+$S_B = 2.1e8\ km^2 $ 佔地球表面積 $40\%$，因此至少需要 $3$ 架衛星；
+
+$S_C = 1.86e7\ km^2$ 佔地球表面積 $3.6\%$，因此至少需要 $28$ 架衛星。
+
+\subsection{考量月球的影響(月球質量為 \texorpdfstring{$\frac{1}{81}$}{1/81} 的地球質量、月球半徑為地球半徑的
+\texorpdfstring{$0.27$}{0.27} 倍、距離地球 \texorpdfstring{$38$}{38} 萬公里),若考量一開始地球、衛星、月球依序連
+成一線。評估對一般衛星、低空衛星的影響(該題為三體運動,通常三
+體運動沒有好的解析解,但本題可以忽略衛星對地球、衛星對月球的影
+響,且可以透過運動方程式與數值模擬可以知道月球對衛星的影響)。
+透過評估,衛星需要多少外加動力(能量,通常可以透過太陽能轉換)
+以維持該軌道運行。}
+
+\section{化學碰撞學說題}
+
+在高中時期化學反應可以藉由碰撞學說來解釋,然而碰撞問題牽涉到許多物
+理問題,本題將透過物理的觀點來評估不考慮化學特性下的化學反應問題。
+
+\subsection{考慮最簡單的化合反應( \texorpdfstring{$A + B \rightarrow C$}{A+B -> C} ), 若考量最簡單的統計結果
+(分子平均動能與溫度關係為 \texorpdfstring{$\frac{1}{2} mv^2 = \frac{3}{2} kT$}{1/2 mv2 = 3/2 kT},
+其中 \texorpdfstring{$m$}{m} 為該分子質量、
+\texorpdfstring{$k$}{k} 波茲曼常數 \texorpdfstring{$ = 1.38 \times 10^{-23} J/K$}{=1.38*10-23 J/K}、
+\texorpdfstring{$T$}{T} 為溫度單位為 \texorpdfstring{$K$}{K} )。
+另外,為了簡化問題我們把問題簡化成化合物 \texorpdfstring{$A$}{A}、
+\texorpdfstring{$B$}{B} 一開始在一個細玻
+璃管的兩端,也就是可以視為一維碰撞。
+討論 (1) \texorpdfstring{$m_A \simeq m_B$}{mA ≈ mB}、
+(2) \texorpdfstring{$m_A > m_B$}{mA>mB} 在溫度 \texorpdfstring{$T$}{T}
+的情況下有多少比例的能量
+可以用於克服活化能(用 \texorpdfstring{$m_A$}{mA}、
+\texorpdfstring{$m_B$}{mB}、\texorpdfstring{$k$}{k} 與 \texorpdfstring{$T$}{T} 表示)?
+(活化能的古典物理圖像可以視為電子間排斥所產生的位能。)
+(注意 \texorpdfstring{$A$}{A} 與 \texorpdfstring{$B$}{B} 皆會移動)。}
+
+化合反應為兩物碰撞後黏在一起，因此為非彈性碰撞，遵守動量守恆，而總能量則有一部份拿去活化。
+
+設 $V_f$ 為碰撞後速度
+
+動量守恆: $m_A v_A + m_B v_B = (m_A+m_B)V_f$
+
+$V_f = \frac{m_A v_A + m_B v_B}{m_A+m_B}$
+
+總能量: $E_{total} = \frac{1}{2} m_A v_A^2 + \frac{1}{2} m_B v_B^2 = \frac{2}{3}kT + \frac{2}{3}kT = 3kT$
+
+活化能為總能量減去碰撞後剩餘的能量: 
+
+$$E_{act} = 3kT - \frac{1}{2} (m_A+m_B)V_f^2$$
+$$ = 3kT - \frac{1}{2}(m_A+m_B) {(\frac{m_A v_A + m_B v_B}{m_A+m_B})}^2$$
+$$ = 3kT - \frac{1}{2}(\frac{{(m_A v_A + m_B v_B)}^2}{m_A+m_B}) $$
+$$ = 3kT - \frac{1}{2}(\frac{m_A^2v_A^2 + m_B^2v_B^2 + 2m_Am_Bv_Av_B}{m_A+m_B}) $$
+
+
+
+$$E_{act} = 3kT - \frac{1}{2}(\frac{m_A^2v_A^2 + m_B^2v_B^2 + 2m_Am_Bv_Av_B}{m_A+m_B}) $$
+
+由 $ \frac{1}{2} m_A v_A^2 = \frac{3}{2}kT $，兩邊同乘 $2m_A$，得 $m_A^2 v_A^2 = 3kTm_A$，
+
+同理 $m_B^2 v_B^2 = 3kTm_B$，
+
+設 $v_A$ 方向為正，$v_B$ 方向為負(相對 A 而言)，
+
+$ m_Av_A = \sqrt{3kTm_A} $，$ m_Bv_B = -\sqrt{3kTm_B} $，代入上式得
+
+$$E_{act} = 3kT - \frac{3kT(m_A + m_B - 2\sqrt{m_Am_B})}{2(m_A+m_B)} $$
+
+如果 $m_A ≈ m_B$，則 $E_{act} = 3kT$，比例為 $\frac{E_{act}}{E_t} = 1$，表示把所有能量都用於克服活化能。
+
+如果 $m_A > m_B$，則 $E_{act} = 3kT - \frac{3kT(m_A + m_B - 2\sqrt{m_Am_B})}{2(m_A+m_B)} $，
+比例為 $$\frac{E_{act}}{E_t} = \frac{3kT - \frac{3kT(m_A + m_B - 2\sqrt{m_Am_B})}{2(m_A+m_B)}}{3kT}$$
+
+\subsection{根據 2.1 的結論評估怎樣的條件下比較容易產生反應?(在不考慮化學
+性質)}
+
+活化能越小越好反應，表示第二項的 $ \frac{3kT(m_A + m_B - 2\sqrt{m_Am_B})}{2(m_A+m_B)} $ 越大越好，
+因此 $m_A, m_B$ 越接近越好。
+
+程式碼(Python3)：
+
+\begin{lstlisting}
+    # 2_B.py
+    import matplotlib.pyplot as plt
+    import numpy as np
+    
+    T = 323
+    k = 1.38e-23
+    m_A = np.linspace(1,100,100) # 設 m_A = 1~100 kg
+    m_B = np.linspace(50,100,100) # 設 m_B = 50~100 kg
+    E_act = 3*k*T - (3*k*T * (m_A + 50 - 2 * (m_A * 50)**0.5) ) / ( 2 * (m_A + 50) ) # 計算 Activation Energy
+    plt.plot(m_A,E_act, label = 'm_A')
+    plt.plot(m_B,E_act, label = 'm_B')
+    plt.plot(m_A + m_B,E_act, label = 'm_A + m_B')
+    plt.legend()
+    plt.xlabel('m (kg)')
+    plt.ylabel('Activation Energy (J)')
+    plt.show()
+\end{lstlisting}
+
+\subsection{做一個最糟糕的模型思考,如果一個容器只有兩個 \texorpdfstring{$A$}{A} 與
+一個 \texorpdfstring{$B$}{B} 反應後
+剩一個 \texorpdfstring{$A$}{A} 與一個 \texorpdfstring{$C$}{C}, 假設依然符合最簡單的統計結果, 當
+(1) \texorpdfstring{$m_A ≈ m_B$}{mA ≈ mB}
+、(2) \texorpdfstring{$m_A > m_B$}{mA>mB} 兩個例子完成反應且熱平衡之後剩下溫度是多少?
+(用 \texorpdfstring{$m_A$}{mA}、\texorpdfstring{$m_B$}{mB}、
+\texorpdfstring{$k$}{k} 與 \texorpdfstring{$T$}{T} 表示)(這題的模型不夠完善,因為統計必須在數
+量夠多的情況下才吻合事實,然而可以透過這種簡易模型推測外界需要
+輸入多少能量才能維持所有的反應在同一溫度)}
+
+
+
+\subsection{然而根據 \texorpdfstring{$A$}{A}、\texorpdfstring{$B$}{B}、\texorpdfstring{$C$}{C} 的結論會發覺不是所有的化學反應皆符合上述結
+論,為何?試著討論,並且自行搜尋為何高中化學的軌域有
+s、p、d、f 軌域,該結論如何得到?}
+
+在古典物理學，拉塞福原子模型認為電子繞核做圓周運動，
+因此應有向心加速度，會不斷輻射電磁波做螺旋運動最後墜落到核上，
+但大部分原子很安定，不符合事實，因此波耳提出氫原子模型，並做了基本假設，
+然而波耳只考慮電子粒子性，未考慮波動性，只能解釋氫原子，因此波耳模型也不符合事實。
+
+量子力學中以軌域解釋電子的運動，表達電子出現在特定空間的機率
+
+\section{馬尾題}
+
+女孩子綁馬尾、女孩子有馬尾跑步往往讓人感受到可愛,為什麼這麼可愛?
+本題曾經在 2012 年獲得搞笑諾貝爾物理獎可參閱
+(\url{https://pansci.asia/archives/70394})。然而我們從另一個方向來思考為什麼這
+麼可愛?
+
+\subsection{若考慮每根頭髮都是一個單擺,且髮長 \texorpdfstring{$L$}{L} ,且不考慮頭髮處處質量即為
+將有效質量放在頭髮的尾端,且質量 \texorpdfstring{$m$}{m}, 在小角度擺動時候的週期為
+何?}
+
+設 $\vec{F}$ 表擺錘合力，透過力學分析可知 $\vec{F} = mgsin\ \theta$
+
+由虎克定律可知 $\vec{F} = -k\vec{x}$
+
+因此 $\vec{F} = -k\vec{x} = mgsin\ \theta$
+
+因為 $\theta$ 是小角度，因此 $sin\ \theta ≈ \theta = \frac{x}{L}$，$x$ 表擺錘到對稱線的水平距離
+
+$$kx = mg\frac{x}{L}, k = \frac{mg}{L}$$
+
+彈簧週期公式推導
+
+$$x = sin\ \omega t, v = \dot{x} = \omega cos\ \omega t, a = \ddot{x} = - \omega^2 sin\ \omega t = - \omega^2 x$$
+$$ma = -kx \Rightarrow a = -\omega^2 x = -\frac{kx}{m} \Rightarrow \omega = \sqrt{\frac{k}{m}}$$
+
+週期 $T = \frac{2\pi}{\omega} = 2\pi \sqrt{\frac{m}{k}}$
+
+代入 $k = \frac{mg}{L}$
+得小角度單擺週期為
+
+$$T = 2\pi \sqrt{\frac{m}{\frac{mg}{L}}} = 2\pi \sqrt{\frac{L}{g}}$$
+
+\subsection{然而女孩子在跑步時馬尾不會是小角度擺動,請考慮任意角度的運動行
+為也就是考慮該單擺的 \texorpdfstring{$x(t)$}{x(t)}。}
+
+力學能分析：
+
+設 $\theta = 0$ 時擺錘高度為零位面，位能 $\Delta U = mgh$，動能 $\Delta K = \frac{1}{2}mv^2$
+
+若沒有能量損失，位能動能變化量相等，$mgh = \frac{1}{2}mv^2$
+
+得 $v = \sqrt{2gh}$，又 $v = L \dot{\theta}$，得 $\dot{\theta} = \frac{\sqrt{2gh}}{L}$
+
+設初始狀態 $\theta_0 = \theta(0), \dot{\theta_0} = 0 , y_0 = L cos\ \theta_0, y_1 = L cos\ \theta$，欲求 $\theta$
+
+$$h = L(cos\ \theta - cos\ \theta_0)$$
+$$\dot{\theta} = \sqrt{\frac{2g}{L}(cos\ \theta - cos\ \theta_0)} $$
+$$\ddot{\theta} = \frac{1}{2} \frac{-\frac{2g}{L}sin\ \theta}{\sqrt{\frac{2g}{L}(cos\ \theta - cos\ \theta_0)}} \dot{\theta} = -\frac{g}{L}sin\ \theta $$
+
+在小角度時 $\ddot{\theta} = \frac{g}{L}\theta $
+代表某個東西的二次微分是負的自己，而且有上下界，而$sin, cos$就有這樣的性質，
+因此可假設解為 $\theta(t) = A \cos\ (\omega t + \delta)$
+
+求任意角度的單擺週期：
+
+將上式倒數同乘 $d\theta$，
+
+$$ dt = \sqrt{\frac{L}{2g}}\frac{d\theta}{\sqrt{(cos\ \theta - cos\ \theta_0)}} $$
+
+在圓周運動中，$\theta$ 的變化過程為 $\theta_0 \rightarrow 0 \rightarrow -\theta_0 \rightarrow 0 \rightarrow \theta_0$
+
+而週期可以寫成一周轉多久，或可寫成半周轉多久的兩倍，也可寫成四分之一周轉多久的四倍
+$$T = 4t(\theta_0 \rightarrow 0)$$
+$$ = 4 \sqrt{\frac{L}{2g}} \int^{\theta_0}_0 \frac{d\theta}{\sqrt{(cos\ \theta - cos\ \theta_0)}} $$
+
+其中的積分式符合橢圓積分中的第一類橢圓積分 $F(\phi,k) = \int^{\phi}_0 \frac{du}{\sqrt{1-k^2sin^2\ u}} $，
+使$sin\ u=\frac{sin\ \frac{\pi}{2}}{sin\ \frac{\theta_0}{2}}$，改寫週期公式 
+$$T = 4\sqrt{\frac{L}{g}}F(\frac{\pi}{2},sin\ \frac{\theta}{2})$$
+
+在 $\theta$ 很小時，具等時性 $T_0 = \frac{2\pi}{\omega_0}$
+
+兩者相除
+$$\frac{T}{T_0} = \frac{2}{\pi}K(sin\ \frac{\theta_0}{2})$$
+其中 $K(\cdot)$ 表示第一類完全橢圓積分，$K(\cdot) = F(\frac{\pi}{2}, \cdot )$
+
+而求 $\theta$，就是先求 $K$ 的反函數(雅可比橢圓函數：sn)再求反正弦，因此
+
+$$\theta (t) = 2\,\arcsin \left\{ \sin\frac{\theta_0}{2} \, \mbox{sn} \left[ \frac{\omega_0}{\omega}\left(\frac{\pi}{2} - \omega t \right) 
+ ; \sin \frac{\theta_0}{2} \right] \right\}$$
+
+
+程式碼(Python3)：
+
+\begin{lstlisting}
+# 3_C_1.py 求角度微分方程解
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
+
+g = 9.8
+l = 1
+def diff(y, t):
+    omega, theta = y
+    return np.array([-(g/l)*np.sin(theta), omega])
+t = np.linspace(0, 10, 1000)
+theta_0 = 50 / 180 * np.pi
+ret = odeint(diff, [0, theta_0 ], t)
+
+plt.plot(t, ret[:, 0])
+plt.plot(t, ret[:, 1])
+plt.show()
+\end{lstlisting}
+
+\begin{lstlisting}
+# 3_C_2.py 模擬週期
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import special
+
+theta_0 = np.linspace(0, np.pi, 100)
+L = 1
+g = 9.8
+omega_0 = np.sqrt(g/L)
+T_0 = 2*np.pi/omega_0
+T = 4*np.sqrt(L/g)*special.ellipk(np.sin(theta_0/2))
+plt.plot(theta_0, T/T_0)
+plt.xlabel(r'$\theta_0$')
+plt.ylabel(r'$T/T_0$')
+plt.show()
+
+\end{lstlisting}
+
+
+\subsection{利用傅立葉轉換算出 \texorpdfstring{$B$}{B} 中的頻率(或是週期)分析。}
+
+已知 $$\theta (t) = 2\,\arcsin \left\{ \sin\frac{\theta_0}{2} \, \mbox{sn} \left[ \frac{\omega_0}{\omega}\left(\frac{\pi}{2} - \omega t \right) 
+; \sin \frac{\theta_0}{2} \right] \right\}$$
+
+傅立葉級數 $F_n(x) = \frac{a_0}{2} + \sum_{k=1}^{n} (a_k cos(kx) + b_k sin(kx))$
+$$a_k = \frac{2}{T} \int_\frac{-T}{2}^\frac{T}{2} f(t) cos(\frac{2\pi kt}{T}) dt, k=0,1,2,\cdots $$
+$$b_k = \frac{2}{T} \int_\frac{-T}{2}^\frac{T}{2} f(t) sin(\frac{2\pi kt}{T}) dt, k=1,2,\cdots $$
+
+欲進行傅立葉轉換，必須滿足狄利克雷條件，在上題結果中，$t$在週期$T$內連續、有週期性、有界、有限、可積分，因此可進行傅立葉轉換。
+
+由於 $\sin $ 是奇函數，因此 $b_k = 0$，只有 $a_k$ 有值，且 $a_0 = 0$，
+先將 $\theta(t)$ 改寫成 $\theta(t) = \Sigma^\infty_{k=0} c_{2k+1} \cos\ \left[(2k+1)\omega t\right], k=0,1,2,\cdots$
+
+其中
+
+$$c_{2k+1} = \frac{2}{T}\int^T_0 \theta(t) \cos\ \left[(2k+1)\omega t\right] dt$$
+$$ = \frac{2}{\pi} \int^{2\pi}_0 \arcsin \left\{ \sin\frac{\theta_0}{2} \, \mbox{sn} \left[ \frac{\omega_0}{\omega}\left(\frac{\pi}{2} - \xi \right) 
+; \sin \frac{\theta_0}{2} \right] \right\} \cos\ \left[(2k+1)\xi \right] d\xi,k=0,1,2,\cdots$$
+
+
+
+\subsection{然而頭髮不該是單擺,因為每一段都有質量。所以先將問題考慮髮長
+\texorpdfstring{$L$}{L} ,且在 \texorpdfstring{$L − dL$}{L-dL} 與 \texorpdfstring{$L$}{L} 
+各有質量 \texorpdfstring{$\frac{m}{2}$}{m/2} (也就是考慮兩個質量點),試求在髮
+尾的質量其運動方程式 \texorpdfstring{$x(t)$}{x(t)},並透過傅立葉轉換算出頻率分析。}
+
+拉格朗日力學公式：拉格朗日量為系統動能減去系統位能，$L = T - V$
+
+假設較上方的質量點 $m_1$ 座標為 $(x_1,y_1)$，
+較下方的質量點 $m_2$ 座標為 $(x_2,y_2)$，
+兩點的垂直角度為 $\theta_1, \theta_2$，髮長 $L$ 分成 $L_1,L_2$，
+
+$$x_1=L_1\sin\ \theta_1,y_1=-L_1\cos\ \theta_1$$
+$$x_2=x_1+L_2\sin\ \theta_2,y_2=y_1-L_2\cos\ \theta_2$$
+
+那麼
+
+$$L = \frac{1}{2}m_1(\dot{x_1}^2 + \dot{y_1}^2) + \frac{1}{2}m_2(\dot{x_2}^2 + \dot{y_2}^2)
+- m_1gy_1 - m_2gy_2$$
+
+代入座標與角度關係得
+
+$$L = \frac{1}{2}(m_1+m_2)L_1^2\dot{\theta_1}^2 + \frac{1}{2}m_2L_2^2\dot{\theta_2}^2
++ m_2L_1L_2\dot{\theta_1}\dot{\theta_2}\cos\ (\theta_1 - \theta_2)
++ (m_1+m_2)gL_1\cos\ \theta_1 + m_2gL_2\cos\ \theta_2
+$$
+
+將 $L$ 對 $\theta_1$ 與 $\theta_2$ 求偏微分，並令偏微分為 $0$，
+
+$$\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_2}} - \frac{\partial L}{\partial \theta_1} = 0$$
+$$\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_2}} - \frac{\partial L}{\partial \theta_2} = 0$$
+
+使用Python繼續推導：
+
+\begin{lstlisting}
+    # 3_D_1.py
+    from sympy import *
+    from sympy import Derivative as D
+    
+    var("x1 x2 y1 y2 L1 L2 m1 m2 dtheta1 dtheta2 ddtheta1 ddtheta2 t g tmp")
+    
+    var("theta1 theta2", cls=Function)
+    
+    
+    sublist = [
+        (D(theta1(t), t, t), ddtheta1),
+        (D(theta1(t), t), dtheta1),
+        (D(theta2(t), t, t), ddtheta2),
+        (D(theta2(t), t), dtheta2),
+        (theta1(t), theta1()),
+        (theta2(t), theta2())
+    ]
+    
+    x1 = L1 * sin(theta1(t))
+    y1 = -L1 * cos(theta1(t))
+    x2 = x1 + L2 * sin(theta2(t))
+    y2 = y1 - L2 * cos(theta2(t))
+    
+    vx1 = diff(x1, t)
+    vy1 = diff(y1, t)
+    vx2 = diff(x2, t)
+    vy2 = diff(y2, t)
+    
+    L = m1/2 * (vx1**2 + vy1**2) + m2/2 * (vx2**2 + vy2**2) - m1 * g * y1 - m2 * g * y2
+    
+    def lagrange(L, v):
+        dv = D(v(t),t)
+        a = L.subs(dv, tmp).diff(tmp).subs(tmp, dv)
+        b = L.subs(dv, tmp)
+        b = b.subs(v(t),v())
+        b = b.diff(v())
+        b = b.subs(v(), v(t))
+        b = b.subs(tmp, dv)
+        c = a.diff(t) - b
+        c = c.subs(sublist)
+        c = trigsimp(simplify(c))
+        c = collect(c, [theta1(),theta2(),dtheta1,dtheta2,ddtheta1,ddtheta2])
+        return c
+    
+    eq1 = lagrange(L, theta1)
+    eq2 = lagrange(L, theta2)
+    
+    print("eq1 = ", eq1)
+    print("eq2 = ", eq2)
+\end{lstlisting}
+
+推導出來後可以模擬動畫：
+
+\begin{lstlisting}
+    # 3_D_2.py
+    import matplotlib
+    matplotlib.use('WXAgg')
+    import matplotlib.pyplot as plt
+    
+    import numpy as np
+    from scipy.integrate import odeint
+    from math import *
+    import wx
+    
+    
+    g = 9.8
+    class DoublePendulum(object):
+        def __init__(self,m1,m2,L1,L2):
+            self.m1, self.m2 = m1, m2
+            self.L1, self.L2 = L1, L2
+            self.init_stat = np.array([0.0, 0.0, 0.0, 0.0])
+    
+        def equations(self,w,t):
+            m1, m2, L1, L2 = self.m1, self.m2, self.L1, self.L2
+            theta1, theta2, v1, v2 = w
+            dth1 = v1
+            dth2 = v2
+    
+            eq1a = (m1+m2)*L1*L1
+            eq1b = m2*L1*L2*cos(theta1-theta2)
+            eq1c = L1*(m2*L2*dth2*dth2*sin(theta1-theta2) + (m1+m2)*g*sin(theta1))
+    
+            eq2a = L1*m2*L2*cos(theta1-theta2)
+            eq2b = L2*L2*m2
+            eq2c = m2*L2*(-L1*dth1*dth1*sin(theta1-theta2) + g*sin(theta2))
+    
+            dv1, dv2 = np.linalg.solve([[eq1a, eq1b], [eq2a, eq2b]], [-eq1c, -eq2c])
+    
+            return np.array([dth1, dth2, dv1, dv2])
+    
+    def double_pendulum_odeint(pendulum, l, r, step):
+        t = np.arange(l,r,step)
+        trk = odeint(pendulum.equations, pendulum.init_stat, t)
+        theta1, theta2 = trk[:,0], trk[:,1]
+        L1 = pendulum.L1
+        L2 = pendulum.L2
+        x1 = L1*np.sin(theta1)
+        y1 = -L1*np.cos(theta1)
+        x2 = x1 + L2*np.sin(theta2)
+        y2 = y1 - L2*np.cos(theta2)
+        pendulum.init_stat = trk[-1,:].copy()
+        return [x1, y1, x2, y2]
+    
+    fig = plt.figure(figsize=(6,6))
+    
+    line1, = plt.plot([0,0],[0,0],"-o")
+    line2, = plt.plot([0,0],[0,0],"-o")
+    plt.axis("equal")
+    plt.xlim(-5,5)
+    plt.ylim(-5,5)
+    
+    print('模擬雙擺運動(若直接按下Enter則使用預設值)：')
+    
+    m1 = input('請輸入m1質量[1.0]：')
+    if m1 == '':
+        m1 = 1.0
+    m2 = input('請輸入m2質量[1.0]：')
+    if m2 == '':
+        m2 = 1.0
+    L1 = input('請輸入L1長度[1.0]：')
+    if L1 == '':
+        L1 = 1.0
+    L2 = input('請輸入L2長度[1.0]：')
+    if L2 == '':
+        L2 = 1.0
+    
+    pendulum = DoublePendulum(m1, m2, L1, L2)
+    theta1 = input('請輸入初始theta1角度(徑度)[1.0]：')
+    if theta1 == '':
+        theta1 = 1.0
+    theta2 = input('請輸入初始theta2角度(徑度)[1.0]：')
+    if theta2 == '':
+        theta2 = 1.0
+    pendulum.init_stat[:2] = theta1, theta2
+    
+    x1,y1,x2,y2 = double_pendulum_odeint(pendulum, 0, 30, 0.02)
+    plt.plot(x1,y1,label="m_1")
+    plt.plot(x2,y2,label="m_2")
+    
+    plt.title("m1 = %s, m2 = %s, L1 = %s, L2 = %s, theta1 = %s, theta2 = %s" % (m1, m2, L1, L2, theta1, theta2))
+    
+    idx = 0
+    
+    def update_line(event):
+        global x1,y1,x2,y2,idx
+        if idx == len(x1):
+            idx = 0
+            x1, y1, x2, y2 = double_pendulum_odeint(pendulum, 0, 30, 0.02)
+        line1.set_xdata([0,x1[idx]])
+        line1.set_ydata([0,y1[idx]])
+        line2.set_xdata([x1[idx],x2[idx]])
+        line2.set_ydata([y1[idx],y2[idx]])
+        fig.canvas.draw()
+        idx += 1
+    
+    id = wx.ID_ANY
+    actor = fig.canvas.manager.frame
+    actor.Bind(wx.EVT_TIMER, update_line, id=id)
+    timer = wx.Timer(actor, id)
+    timer.Start(1)
+    
+    plt.legend()
+    
+    plt.show()
+\end{lstlisting}
+
+
+\subsection{將 \texorpdfstring{$D$}{D} 考量成每段都有質量,也就是每一段的質量為 
+\texorpdfstring{$\frac{m}{n}$}{m/n}
+(其中 \texorpdfstring{$n$}{n} 趨近無限大),且每段距離差 \texorpdfstring{$dL$}{dL} 
+(\texorpdfstring{$dL$}{dL} 趨近於 \texorpdfstring{$0$}{0})的髮尾運動方程式 
+\texorpdfstring{$x(t)$}{x(t)}與透過傅立葉轉換算出頻率分析。
+(2.4與 2.5 是屬於混沌系統(chaos system)不會有好的解析解)}
+
+當考慮越多段的運動會越複雜，需要考量的因子越來越多，計算時間也將大大增加，
+如果要趨近無限大，無論是人算或現代電腦計算無法在有限時間內完成。
+
+
+
+\end{document}
